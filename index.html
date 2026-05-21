@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DentalNotes Marketplace</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+</head>
+
+<body class="bg-gray-100">
+
+<nav class="bg-white shadow p-4 flex justify-between">
+<h1 class="font-bold text-xl text-blue-600">DentalNotes</h1>
+<button id="connectBtn" class="bg-blue-600 text-white px-5 py-2 rounded-lg">
+Connect Wallet
+</button>
+</nav>
+
+<div class="max-w-5xl mx-auto mt-10 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+<div class="bg-white p-6 rounded-xl shadow">
+<h2 class="font-bold text-lg mb-2">Module 1</h2>
+<p class="text-gray-500 mb-4">Dental Study Notes</p>
+<p class="text-2xl font-bold mb-4">7.99 USDC</p>
+<button onclick="buyNote(0)" class="bg-green-600 text-white w-full py-2 rounded">
+Buy
+</button>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow">
+<h2 class="font-bold text-lg mb-2">Module 2</h2>
+<p class="text-gray-500 mb-4">Dental Study Notes</p>
+<p class="text-2xl font-bold mb-4">7.99 USDC</p>
+<button onclick="buyNote(1)" class="bg-green-600 text-white w-full py-2 rounded">
+Buy
+</button>
+</div>
+
+<div class="bg-white p-6 rounded-xl shadow">
+<h2 class="font-bold text-lg mb-2">Module 3</h2>
+<p class="text-gray-500 mb-4">Dental Study Notes</p>
+<p class="text-2xl font-bold mb-4">7.99 USDC</p>
+<button onclick="buyNote(2)" class="bg-green-600 text-white w-full py-2 rounded">
+Buy
+</button>
+</div>
+
+</div>
+
+<script>
+const contractAddress = "0x2276F2F068c633eCb97dfbEa4d4fbe9bb07Ab4Cb";
+const usdcAddress = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174";
+
+const abi = [
+"function purchaseNote(uint256 noteId)",
+"function getCID(uint256 noteId) view returns(string)"
+];
+
+const usdcAbi = [
+"function approve(address spender,uint256 amount)"
+];
+
+let signer;
+let contract;
+let usdc;
+
+async function connectWallet(){
+
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+await provider.send("eth_requestAccounts",[]);
+
+signer = provider.getSigner();
+
+contract = new ethers.Contract(contractAddress,abi,signer);
+usdc = new ethers.Contract(usdcAddress,usdcAbi,signer);
+
+}
+
+async function buyNote(id){
+
+const price = ethers.utils.parseUnits("7.99",6);
+
+const tx1 = await usdc.approve(contractAddress,price);
+await tx1.wait();
+
+const tx2 = await contract.purchaseNote(id);
+await tx2.wait();
+
+const cid = await contract.getCID(id);
+
+window.open("https://ipfs.io/ipfs/"+cid);
+
+}
+
+document.getElementById("connectBtn").onclick = connectWallet;
+</script>
+
+</body>
+</html>
